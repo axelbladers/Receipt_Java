@@ -1,53 +1,48 @@
-package Shop;
-
-import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        Store store = new Store(5);
+        Cashier cashier1 = new Cashier("C001", "Alice", 1200);
+        CashRegister cashRegister1 = new CashRegister("CR001", cashier1);
+        store.addCashier(cashier1);
+
+        Product apple = new FoodProduct("F001", "Apple", 0.5, 100, LocalDate.now().plusDays(10));
+        Product shampoo = new NonFoodProduct("NF001", "Shampoo", 3.0, 50);
+        Product chicken = new FoodProduct("F002", "Chicken", 5.0, 20, LocalDate.now().plusDays(5));
+        Product rice = new FoodProduct("F003", "Rice", 1.2, 80, LocalDate.now().plusMonths(6));
+        store.addProduct(apple);
+        store.addProduct(shampoo);
+        store.addProduct(chicken);
+        store.addProduct(rice);
+
+        Customer customer = new Customer("CU001", "Bob", 50);
+        List<Product> productsToBuy = new ArrayList<>();
+        productsToBuy.add(apple);
+        productsToBuy.add(shampoo);
+        productsToBuy.add(chicken);
+        productsToBuy.add(rice);
+
+        List<Integer> quantitiesToBuy = new ArrayList<>();
+        quantitiesToBuy.add(2);
+        quantitiesToBuy.add(1);
+        quantitiesToBuy.add(3);
+        quantitiesToBuy.add(5);
+
         try {
-            Store store = new Store();
-
-            // Create products
-            Product apple = new Product("Apple", 0.5, 10);
-            Product bread = new Product("Bread", 1.5, 5);
-
-            // Add products to store (delivery)
-            store.addDeliveredProduct(apple, 10);
-            store.addDeliveredProduct(bread, 5);
-
-            // Create a customer
-            Customer customer = new Customer("John Doe", 10.0);
-
-            // Create a cashier and add to store
-            Cashier cashier = new Cashier("Jane Smith", 1, 1500);
-            store.addCashier(cashier);
-
-            // Create a cash register and add products
-            CashRegister register = new CashRegister();
-            register.addProduct(apple, 3);
-            register.addProduct(bread, 2);
-
-            // Cashier sells products to the customer
-            boolean success = cashier.sellProducts(customer, register, store);
-
-            if (success) {
-                System.out.println("Purchase successful.");
-            } else {
-                System.out.println("Purchase failed.");
-            }
-
-            // Check total receipts and revenue
-            System.out.println("Total Receipts: " + store.getTotalReceipts());
-            System.out.println("Total Revenue: " + store.getTotalRevenue());
-            System.out.println("Total Expenses: " + store.getTotalExpenses());
-            System.out.println("Profit: " + store.calculateProfit());
-
-            // Read a specific receipt from file
-            String receiptContent = Store.readReceiptFromFile(1);
-            System.out.println("Receipt 1 Content:\n" + receiptContent);
-
-        } catch (InsufficientQuantityException | IOException e) {
+            customer.purchaseProducts(productsToBuy, quantitiesToBuy);
+            Receipt receipt = cashRegister1.createReceipt(productsToBuy, quantitiesToBuy, LocalDateTime.now());
+            store.addReceipt(receipt);
+            System.out.println("Receipt generated: \n" + receipt);
+        } catch (InsufficientQuantityException e) {
             System.err.println(e.getMessage());
         }
+
+        // Display store statistics
+        System.out.println("Total receipts issued: " + store.getTotalReceipts());
+        System.out.println("Total turnover: " + store.getTurnover());
     }
 }
