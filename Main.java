@@ -44,5 +44,7 @@ public class Main {
         // Display store statistics
         System.out.println("Total receipts issued: " + store.getTotalReceipts());
         System.out.println("Total turnover: " + store.getTurnover());
+        System.out.println("Total expenses: " + store.getExpenses());
+        System.out.println("Total profit: " + store.getProfit());
     }
 }
