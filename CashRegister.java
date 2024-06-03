@@ -1,30 +1,55 @@
-package Shop;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 public class CashRegister {
-    private Map<Product, Integer> products;
+    private String id;
+    private Cashier cashier;
 
-    public CashRegister() {
-        this.products = new HashMap<>();
+    public CashRegister(String id, Cashier cashier) {
+        this.id = id;
+        this.cashier = cashier;
     }
 
-    public void addProduct(Product product, int quantity) throws InsufficientQuantityException {
-        product.reduceQuantity(quantity);
-        products.put(product, products.getOrDefault(product, 0) + quantity);
-    }
-
-    public double getTotalPrice() {
-        return products.entrySet().stream().mapToDouble(entry -> entry.getKey().getPrice() * entry.getValue()).sum();
-    }
-
-    public Receipt generateReceipt(Cashier cashier) {
-        List<Product> productList = new ArrayList<>();
-        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
-            productList.add(new Product(entry.getKey().getName(), entry.getKey().getPrice(), entry.getValue()));
+    public Receipt createReceipt(List<Product> products, List<Integer> quantities, LocalDateTime dateTime) throws InsufficientQuantityException {
+        // Check if there is enough quantity for each product
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
+            int quantity = quantities.get(i);
+            if (product.getQuantity() < quantity) {
+                throw new InsufficientQuantityException("Insufficient quantity of " + product.getName() + " - available: " + product.getQuantity());
+            }
         }
-        return new Receipt(cashier, productList, getTotalPrice());
+
+        // Calculate total price and update product quantities
+        double totalPrice = 0;
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
+            int quantity = quantities.get(i);
+            double sellingPrice = product.getSellingPrice();
+            
+            // Check if the product is a FoodProduct and close to expiration
+            if (product instanceof FoodProduct && ((FoodProduct) product).isCloseToExpiration()) {
+                double discount = sellingPrice * ((FoodProduct) product).getMarkupPercentage();
+                sellingPrice -= discount;
+            }
+            
+            totalPrice += sellingPrice * quantity;
+            product.decreaseQuantity(quantity);
+        }
+
+        // Create receipt
+        Receipt receipt = new Receipt(cashier, dateTime, products, quantities, totalPrice);
+
+        // Save receipt to file
+        String fileName = "Receipt_" + LocalDateTime.now() + ".txt";
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write(receipt.toString());
+        } catch (IOException e) {
+            System.err.println("Error writing receipt to file: " + e.getMessage());
+        }
+
+        return receipt;
     }
 }
