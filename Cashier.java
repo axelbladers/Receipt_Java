@@ -1,56 +1,58 @@
-package Shop;
-import java.io.IOException;
+import java.util.Objects;
 
 public class Cashier {
+    private String id;
     private String name;
-    private int idNumber;
-    private double monthlySalary;
+    private double salary;
+    private CashRegister currentRegister;
 
-    public Cashier(String name, int idNumber, double monthlySalary) {
+    public Cashier(String id, String name, double salary) {
+        this.id = id;
         this.name = name;
-        this.idNumber = idNumber;
-        this.monthlySalary = monthlySalary;
+        this.salary = salary;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public double getSalary() {
+        return salary;
     }
 
-    public int getIdNumber() {
-        return idNumber;
+    public CashRegister getCurrentRegister() {
+        return currentRegister;
     }
 
-    public void setIdNumber(int idNumber) {
-        this.idNumber = idNumber;
+    public void setCurrentRegister(CashRegister currentRegister) {
+        this.currentRegister = currentRegister;
     }
 
-    public double getMonthlySalary() {
-        return monthlySalary;
+    @Override
+    public String toString() {
+        return "Cashier{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", salary=" + salary +
+                '}';
     }
 
-    public void setMonthlySalary(double monthlySalary) {
-        this.monthlySalary = monthlySalary;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cashier cashier = (Cashier) o;
+        return Double.compare(cashier.salary, salary) == 0 &&
+                Objects.equals(id, cashier.id) &&
+                Objects.equals(name, cashier.name);
     }
 
-    public boolean sellProducts(Customer customer, CashRegister register, Store store) {
-        if (customer.getMoney() >= register.getTotalPrice()) {
-            customer.setMoney(customer.getMoney() - register.getTotalPrice());
-            Receipt receipt = register.generateReceipt(this);
-            System.out.println(receipt);
-            store.addSoldProduct(receipt);
-            try {
-                store.addReceipt(receipt);
-            } catch (IOException e) {
-                System.err.println("Failed to save receipt: " + e.getMessage());
-            }
-            return true;
-        } else {
-            System.out.println("Not enough money to buy products.");
-            return false;
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, salary);
     }
 }
