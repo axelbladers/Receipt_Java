@@ -1,48 +1,73 @@
-package Shop;
-public class Product {
+import java.util.Objects;
+
+public abstract class Product {
+    private String id;
     private String name;
-    private double price;
+    private double deliveryPrice;
+    private String category;
     private int quantity;
 
-    public Product(String name, double price, int quantity) {
+    public Product(String id, String name, double deliveryPrice, String category, int quantity) {
+        this.id = id;
         this.name = name;
-        this.price = price;
+        this.deliveryPrice = deliveryPrice;
+        this.category = category;
         this.quantity = quantity;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public double getDeliveryPrice() {
+        return deliveryPrice;
     }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
+    public String getCategory() {
+        return category;
     }
 
     public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public void reduceQuantity(int amount) throws InsufficientQuantityException {
-        if (amount > this.quantity) {
-            throw new InsufficientQuantityException("Not enough quantity for product: " + this.name + ". Needed: " + amount + ", available: " + this.quantity);
+    public void decreaseQuantity(int amount) {
+        if (amount <= quantity) {
+            quantity -= amount;
         }
-        this.quantity -= amount;
     }
 
-	public double calculateSellingPrice(int daysToExpire, double discountPercentage) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    public abstract double getSellingPrice();
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", deliveryPrice=" + deliveryPrice +
+                ", category='" + category + '\'' +
+                ", quantity=" + quantity +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Double.compare(product.deliveryPrice, deliveryPrice) == 0 &&
+                quantity == product.quantity &&
+                Objects.equals(id, product.id) &&
+                Objects.equals(name, product.name) &&
+                Objects.equals(category, product.category);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, deliveryPrice, category, quantity);
+    }
 }
